@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<title> Interstellar Horizon </title>
+		<link rel="icon" href="images/favicon.ico" />
+		<style>
+		
+			* { cursor: url("images/lightsaber_green-icon_mouse.png"), url("images/lightsaber_green-icon_mouse.cur"), auto; }
+			
+			html { height: 100%; }
+			
+            body { margin: 0; background-color: #000000; width: 100%; height: 100%; display: block; overflow: hidden; }
+			
+			canvas { width: 100%; height: 100%; display: block; }
+			
+			#horizontalAlignedDiv { display: table; margin: 0 auto; }
+			#verticalAlignedDiv { position: absolute; top: 45%; left: 45%; }
+			
+			#logo { position: relative; top: 30px; }
+			
+			#animation { height: 42%; position: absolute; top: 20%; right: 0px; }
+			
+			#instructionsDetails { display: none; position: absolute; top: 25%; left: 5%; }
+			
+			#gameOverSplash { display: none; position: relative; right: 32%; }
+			#finalPointsText { text-align: center; color: #ffffff; font-size: 37px; }
+			#gameOverText { text-align: center; color: #ffffff; font-size: 35px; }
+					
+			#dashboard { display: none; position: absolute; top: 6%; right: 3%; }
+			.dashboardBar {	height: 7px; }
+			.dashboardItem { height: 20px; }
+			#points { color: #ffffff; font: bold 38px Helvetica, Arial, Sans-Serif; text-shadow: 1px 1px #fe4902, 2px 2px #fe4902, 3px 3px #fe4902; }
+			
+			#muteDiv { display: none; position: absolute; top: 5%; left: 3%; }
+			#muteSymbol { height: 35px; }
+			
+			#copyrightText { color: white; position: absolute; bottom: 5%; left: 47%; }
+			
+			#badges {position: absolute; bottom: 5%; right: 5%; }
+			
+			#loading { display: none; position: relative; right: 30%;}
+			#loadingBar { width: 400px; height: 10px; display: block; }
+			#loadingInfo { color: #ffffff; text-align: center; font-family: "Open Sans", sans-serif; display: block; }
+			
+			.blink {
+				animation-duration: 1.2s;
+				animation-name: blink;
+				animation-iteration-count: infinite;
+				animation-direction: alternate;
+				animation-timing-function: ease-in-out;
+			}
+			@keyframes blink { from { opacity: 1; } to { opacity: 0; } }
+
+			
+        </style>
+	</head>
+	
+	<body ondragstart="return false;" ondrop="return false;">
+	
+		<video id="animation" autoplay loop muted class="deleteOnStart">
+			<source type="video/mp4" src="images/spaceship_model.mp4">
+		</video>
+	
+		<div id="horizontalAlignedDiv">
+		
+			<img id="logo" class="deleteOnStart" src="images/logo.png" />
+			
+			<div id="dashboard">
+				
+				<img src="images/heart.png" class="dashboardItem" /> <img id="lifeBar" class="dashboardBar" src="images/progressbar.png" /><br/>
+				<img src="images/laser_pointer.png" class="dashboardItem" /> <img id="laserBar" class="dashboardBar" src="images/progressbar.png" /><br/>
+				<img src="images/lightning.png" class="dashboardItem" /> <img id="warpSpeedBar" class="dashboardBar" src="images/progressbar.png" /><br/>
+				<img src="images/points.png" class="dashboardItem" /> <span id="points"></span>
+				
+			</div>
+			
+			<div id="verticalAlignedDiv">
+			
+				<div id="gameOverSplash">
+					<img id="gameOverImage" src="images/game_over.gif" alt="Game Over" /><br/>
+					<div id="finalPointsText"></div><br/>
+					<div id="gameOverText" class="blink">Press R to restart the game<br/>Press Esc to return to homepage</div>
+				</div>
+				
+				<div id="loading">
+					<img id="progressbar" src="images/progressbar.png" /><br/>
+					<div id="loadingInfo"></div>	
+				</div>
+		
+				<img id="startGameImage" class="deleteOnStart" src="images/button_startgame.png" alt="Start Game" /><br/><br/><br/>
+				<img id="InstructionsImage" class="deleteOnStart" src="images/button_instructions.png" alt="Instructions" />
+									
+			</div>
+			
+			<div id="copyrightText" class="deleteOnStart">Copyright 2018 &copy;</div>
+			
+		</div>
+		
+		<div id="badges" class="deleteOnStart">
+			<img id="HTML5Badge" src="images/HTML5_badge_64.png" alt="HTML5 Logo" />
+			<img id="webGLBadge" src="images/WebGL_White_100px.png" alt="WebGL Logo" />
+		</div>
+			
+		<div id="instructionsDetails" class="deleteOnStart"><img src="images/instructions.png" /></div>
+
+		<div id="muteDiv"><img id="muteSymbol" src="images/mutebutton.png" /></div>
+		
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/93/three.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r16/Stats.min.js"></script>
+		
+		<script src="http://localhost:8000/game.js"></script>
+		<script src="http://localhost:8000/lensflare.js"></script>
+		
+		<script>
+		
+			var loadManager = new THREE.LoadingManager();
+
+			document.addEventListener( "contextmenu", function(event) { event.preventDefault(); }); <!-- disable mouse left-click -->
+			
+			document.getElementById("startGameImage").addEventListener("mouseover", function() { this.src = "images/button_startgame_focus.png"; });		
+			document.getElementById("startGameImage").addEventListener("mouseleave", function() { this.src = "images/button_startgame.png"; });	
+			
+			document.getElementById("startGameImage").addEventListener("click", function() { 
+
+				var toDelete = document.getElementsByClassName("deleteOnStart");
+				while(toDelete.length > 0) { toDelete[0].parentNode.removeChild(toDelete[0]) };
+				
+				document.getElementById("loading").style.display = "block";
+				
+				loadObjects(loadManager);
+				
+			});
+			
+			document.getElementById("InstructionsImage").addEventListener("mouseover", function() { 
+				this.src = "images/button_instructions_focus.png";
+				document.getElementById("instructionsDetails").style.display = "block";
+			});
+			
+			document.getElementById("InstructionsImage").addEventListener("mouseleave", function() { 
+				this.src = "images/button_instructions.png"; 
+				document.getElementById("instructionsDetails").style.display = "none";
+			});
+			
+			
+			loadManager.onStart = function ( url, itemsLoaded, itemsTotal ) {
+
+				document.getElementById("loadingInfo").innerHTML =  'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.';
+				
+			};
+
+			loadManager.onLoad = function () { 
+			
+				document.getElementById("loadingInfo").innerHTML = 'Loading complete!'; 
+
+				document.getElementById("loading").parentNode.removeChild(document.getElementById("loading"));
+
+				initGame();
+				
+			};
+
+			loadManager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
+			
+				document.getElementById("progressbar").style = "background: linear-gradient(90deg, #ff4500 " + String((itemsLoaded/itemsTotal)*100) + "%, #000000 0%);";
+				document.getElementById("loadingInfo").innerHTML = 'Loading file: ' + url + ' ...</br>Loaded ' + itemsLoaded + ' / ' + itemsTotal;
+
+			};
+
+			loadManager.onError = function ( url ) { document.getElementById("loadingInfo").innerHTML = 'There was an error loading ' + url; };
+		
+		</script>
+
+	</body>
+	
+</html>
