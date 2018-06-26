@@ -4,4 +4,4 @@ Interstellar Horizon is a 3D browser game, in which the user can drive a spacecr
 
 # Demo
 
-https://marcoschaerfcourses.github.io/final-project-for-interactive-graphics-course-interstellar-horizon/
+https://eretis.github.io/interstellar_horizon
